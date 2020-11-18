@@ -1,0 +1,51 @@
+reset;
+option solver cplexamp;
+option cplex_options 'mipdisplay=2 mipinterval=10 timing=1 heurfreq=-1';
+
+model test.mod;
+#lecture de l'instance
+read n < instance.txt; #nombre total des aerodromes
+read dep < instance.txt; #aerodrome de depart
+read ar < instance.txt; #aerodrome d'arrivee
+read Amin < instance.txt; #nombre minimal des aerodromes à visiter
+read m < instance.txt; #nombre des régions
+read {t in T} reg[t] < instance.txt; 
+read R < instance.txt;
+read {t in 1..n,j in 1..2} cord[t,j] < instance.txt;
+
+
+
+problem Master:x,z,v_min,nbrMinAero,NodeToNode, NoInnerLoop, depart, arrivee, depart2, arrivee2, RegionVist,sous_tour ;
+ option relax_integrality 0;
+
+problem Sub:y,st,sub1,sub2,sub3,sub4,sub5;
+ option relax_integrality 0;
+
+# generation de contraintes initiales
+
+let P_prime := 1;
+
+let {j in T} a[P_prime,j] :=  0;  
+let a[P_prime,1] := 1;
+
+printf "=====Debut de la generation de contraintes=======\n";
+repeat {
+   printf "*********Resolution du probleme Maitre, P_prime= %d\n", P_prime;
+   solve Master;
+   let {i in T, j in T} w[i,j] := x[i,j];
+  
+
+   printf ">>>>>Resolution du sous-probleme\n";
+   solve Sub;
+   if st > 0  then {
+      let P_prime := P_prime + 1;
+      let {i in 1..n} a[P_prime,i] := y[i,i];
+      }
+   else break;
+   };
+printf "======Arret de la generation de contraintes=====\n";
+
+for{i in 1..n}
+for{j in 1..n : x[i,j]=1}
+printf "x[%d,%d]=%d \n",i,j,x[i,j];
+printf "Solve time: %f \n", _total_solve_elapsed_time;

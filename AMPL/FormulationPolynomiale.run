@@ -1,0 +1,33 @@
+option solver cplexamp; #choix du solveur cplex
+model test.mod;
+
+#lecture de l'instance
+read n < instance.txt; #nombre total des aerodromes
+read dep < instance.txt; #aerodrome de depart
+read ar < instance.txt; #aerodrome d'arrivee
+read Amin < instance.txt; #nombre minimal des aerodromes à visiter
+read m < instance.txt; #nombre des régions
+read {t in T} reg[t] < instance.txt; 
+read R < instance.txt;
+display n;
+read {t in 1..n,j in 1..2} cord[t,j] < instance.txt;
+display R;
+display m;
+let l:=0;
+for{t in 1..n}{for{j in 1..n}{
+let l:= round(sqrt((cord[t,1]-cord[j,1])^2+(cord[t,2]-cord[j,2])^2));
+let dis[t,j]:=l;
+
+}}
+
+#for{t in 1..n}{for{j in 1..m}{
+#if(reg[t]==j) then let AIR[j,t]:=1;
+#if(reg[t]!=j) then let AIR[j,t]:=0;
+#
+#}}
+display AIR;
+display dep;
+display ar;
+display Amin;
+solve;
+display x;
